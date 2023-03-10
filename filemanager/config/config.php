@@ -1,7 +1,69 @@
 <?php
-$version = "9.14.0";
+$version = "0.1.0";
 if (session_id() == '') {
     session_start();
+}
+
+/**
+ * Iguana paths
+ */
+$upload_base_url = $iguana_config->media->url;
+if (substr($upload_base_url, -1)=='/') $upload_base_url = substr($upload_base_url, 0, -1);
+$upload_base_url = substr($upload_base_url, 0, strrpos($upload_base_url, '/'));
+$upload_base_dir = $iguana_config->media->dir;
+if (substr($upload_base_dir, -1)=='/') $upload_base_dir = substr($upload_base_dir, 0, -1);
+$upload_base_dir = substr($upload_base_dir, 0, strrpos($upload_base_dir, '/'));
+$current_path = '../../uploads/'; // always the same!
+$file_extensions = array('ext_img', 'ext_file', 'ext_misc', 'ext_video', 'ext_music', 'ext_css', 'ext_font');
+$filetype = !empty($_REQUEST['filetype']) ? $_REQUEST['filetype'] : null;
+if ($filetype=='css') {
+	$upload_url = $upload_base_url.'/css/';
+	$upload_dir = $upload_base_dir.'/css/';
+	$current_path = '../../css/';
+	$file_extensions = array('ext_img', 'ext_css');
+	$_SESSION['IguCMS_upload_url'] = $upload_url;
+	$_SESSION['IguCMS_upload_dir'] = $upload_dir;
+	$_SESSION['IguCMS_current_path'] = $current_path;
+	$_SESSION['IguCMS_extensions'] = $file_extensions;
+} else if ($filetype=='sys') {
+	$upload_url = $upload_base_url.'/img/';
+	$upload_dir = $upload_base_dir.'/img/';
+	$current_path = '../../img/';
+	$file_extensions = array('ext_img');
+	$_SESSION['IguCMS_upload_url'] = $upload_url;
+	$_SESSION['IguCMS_upload_dir'] = $upload_dir;
+	$_SESSION['IguCMS_current_path'] = $current_path;
+	$_SESSION['IguCMS_extensions'] = $file_extensions;
+} else if ($filetype=='img') {
+	$upload_url = $upload_base_url.'/uploads/image/';
+	$upload_dir = $upload_base_dir.'/uploads/image/';
+	$current_path = '../../uploads/image/';
+	$file_extensions = array('ext_img');
+	$_SESSION['IguCMS_upload_url'] = $upload_url;
+	$_SESSION['IguCMS_upload_dir'] = $upload_dir;
+	$_SESSION['IguCMS_current_path'] = $current_path;
+	$_SESSION['IguCMS_extensions'] = $file_extensions;
+} else if ($filetype=='file') {
+	$upload_url = $upload_base_url.'/uploads/file/';
+	$upload_dir = $upload_base_dir.'/uploads/file/';
+	$current_path = '../../uploads/file/';
+	$_SESSION['IguCMS_upload_url'] = $upload_url;
+	$_SESSION['IguCMS_upload_dir'] = $upload_dir;
+	$_SESSION['IguCMS_current_path'] = $current_path;
+	$_SESSION['IguCMS_extensions'] = $file_extensions;
+} else if ($filetype=='upl') {
+	$upload_url = $upload_base_url.'/uploads/';
+	$upload_dir = $upload_base_dir.'/uploads/';
+	$current_path = '../../uploads/';
+	$_SESSION['IguCMS_upload_url'] = $upload_url;
+	$_SESSION['IguCMS_upload_dir'] = $upload_dir;
+	$_SESSION['IguCMS_current_path'] = $current_path;
+	$_SESSION['IguCMS_extensions'] = $file_extensions;
+} else {
+	if (!empty($_SESSION['IguCMS_upload_url'])) $upload_url = $_SESSION['IguCMS_upload_url'];
+	if (!empty($_SESSION['IguCMS_upload_dir'])) $upload_dir = $_SESSION['IguCMS_upload_dir'];
+	if (!empty($_SESSION['IguCMS_current_path'])) $current_path = $_SESSION['IguCMS_current_path'];
+	if (!empty($_SESSION['IguCMS_extensions'])) $file_extensions = $_SESSION['IguCMS_extensions'];
 }
 
 mb_internal_encoding('UTF-8');
@@ -9,7 +71,7 @@ mb_http_output('UTF-8');
 mb_language('uni');
 mb_regex_encoding('UTF-8');
 ob_start('mb_output_handler');
-date_default_timezone_set('Europe/Rome');
+date_default_timezone_set('Europe/Paris');
 setlocale(LC_CTYPE, 'en_US'); //correct transliteration
 
 /*
@@ -38,7 +100,7 @@ define('USE_ACCESS_KEYS', false); // TRUE or FALSE
 |--------------------------------------------------------------------------
 */
 
-define('DEBUG_ERROR_MESSAGE', false); // TRUE or FALSE
+define('DEBUG_ERROR_MESSAGE', true); // TRUE or FALSE
 
 /*
 |--------------------------------------------------------------------------
@@ -66,7 +128,7 @@ $config = array(
     | without final / (DON'T TOUCH)
     |
     */
-    'base_url' => ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == "on") ? "https" : "http"). "://". @$_SERVER['HTTP_HOST'],
+    'base_url' => '', //((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == "on") ? "https" : "http"). "://". @$_SERVER['HTTP_HOST'],
     /*
     |--------------------------------------------------------------------------
     | path from base_url to base of upload folder
@@ -75,7 +137,7 @@ $config = array(
     | with start and final /
     |
     */
-    'upload_dir' => '/source/',
+    'upload_dir' => realpath($upload_dir),
     /*
     |--------------------------------------------------------------------------
     | relative path from filemanager folder to upload folder
@@ -84,7 +146,7 @@ $config = array(
     | with final /
     |
     */
-    'current_path' => '../source/',
+    'current_path' => $current_path,
 
     /*
     |--------------------------------------------------------------------------
@@ -95,7 +157,7 @@ $config = array(
     | DO NOT put inside upload folder
     |
     */
-    'thumbs_base_path' => '../thumbs/',
+    'thumbs_base_path' => '../../thumbs/',
 
     /*
     |--------------------------------------------------------------------------
@@ -106,7 +168,7 @@ $config = array(
     | DO NOT put inside upload folder
     |
     */
-    'thumbs_upload_dir' => '/thumbs/',
+    'thumbs_upload_dir' => $upload_base_dir.'/thumbs/',
 
 
     /*
@@ -117,7 +179,7 @@ $config = array(
     | If you want to be forced to assign the extension starting from the mime type
     |
     */
-    'mime_extension_rename'	=> true,
+    'mime_extension_rename'	=> false,
 
 
     /*
@@ -210,7 +272,7 @@ $config = array(
     | in Megabytes
     |
     */
-    'MaxSizeUpload' => 10,
+    'MaxSizeUpload' => 16,
 
     /*
     |--------------------------------------------------------------------------
@@ -324,7 +386,7 @@ $config = array(
     // 0 => boxes
     // 1 => detailed list (1 column)
     // 2 => columns list (multiple columns depending on the width of the page)
-    // YOU CAN ALSO PASS THIS PARAMETERS USING SESSION VAR => $_SESSION['RF']["VIEW"]=
+    // YOU CAN ALSO PASS THIS PARAMETERS USING SESSION VAR => $_SESSION['IRF']["VIEW"]=
     //
     //******************
     'default_view'                            => 0,
@@ -380,11 +442,13 @@ $config = array(
     //**********************
     //Allowed extensions (lowercase insert)
     //**********************
-    'ext_img'                                 => array( 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'ico', 'webp' ), //Images
-    'ext_file'                                => array( 'doc', 'docx', 'rtf', 'pdf', 'xls', 'xlsx', 'txt', 'csv', 'html', 'xhtml', 'psd', 'sql', 'log', 'fla', 'xml', 'ade', 'adp', 'mdb', 'accdb', 'ppt', 'pptx', 'odt', 'ots', 'ott', 'odb', 'odg', 'otp', 'otg', 'odf', 'ods', 'odp', 'css', 'ai', 'kmz','dwg', 'dxf', 'hpgl', 'plt', 'spl', 'step', 'stp', 'iges', 'igs', 'sat', 'cgm', 'tiff',''), //Files
-    'ext_video'                               => array( 'mov', 'mpeg', 'm4v', 'mp4', 'avi', 'mpg', 'wma', "flv", "webm" ), //Video
-    'ext_music'                               => array( 'mp3', 'mpga', 'm4a', 'ac3', 'aiff', 'mid', 'ogg', 'wav' ), //Audio
-    'ext_misc'                                => array( 'zip', 'rar', 'gz', 'tar', 'iso', 'dmg' ), //Archives
+    'ext_img'       => array( 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'ico', 'webp' ), //Images
+    'ext_file'      => array( 'doc', 'docx', 'rtf', 'pdf', 'xls', 'xlsx', 'txt', 'csv', 'html', 'xhtml', 'psd', 'sql', 'log', 'fla', 'xml', 'ade', 'adp', 'mdb', 'accdb', 'ppt', 'pptx', 'odt', 'ots', 'ott', 'odb', 'odg', 'otp', 'otg', 'odf', 'ods', 'odp', 'css', 'ai', 'kmz','dwg', 'dxf', 'hpgl', 'plt', 'spl', 'step', 'stp', 'iges', 'igs', 'sat', 'cgm', 'tiff','vsd','vsdx','epub',''), //Files
+    'ext_video'     => array( 'mov', 'mpeg', 'm4v', 'mp4', 'avi', 'mpg', 'wma', 'webm', 'mpc', 'qt', 'rm', 'rmi', 'rmvb' ), //Video
+    'ext_music'     => array( 'mp3', 'mpga', 'm4a', 'ac3', 'aiff', 'mid', 'ogg', 'wav', 'ram' ), //Audio
+    'ext_misc'      => array( 'zip', 'rar', 'gz', 'tar', 'iso', 'dmg', '7z', 'gzip', 'sitd', 'tgz' ), //Archives
+    'ext_css'       => array( 'css' ),
+    'ext_font'      => array( 'woff', 'woff2', 'eot', 'ttf', 'otf' ),
 
 
     //*********************
@@ -497,7 +561,7 @@ $config = array(
     /*******************
     * URL upload
     *******************/
-    'url_upload'                             => true,
+    'url_upload'                             => false,
 
 
     //************************************
@@ -554,16 +618,17 @@ $config = array(
 
 );
 
+
+$temp_ext_array = array();
+foreach($file_extensions as $file_extension) {
+	$temp_ext_array = array_merge($temp_ext_array, $config[$file_extension]);
+}
+
 return array_merge(
     $config,
     array(
-        'ext' => array_merge(
-            $config['ext_img'],
-            $config['ext_file'],
-            $config['ext_misc'],
-            $config['ext_video'],
-            $config['ext_music']
-        ),
+		'ext' => $temp_ext_array,
+		'upload_url' => $upload_url,
         'tui_defaults_config' => array(
             //'common.bi.image'                   => $config['common.bi.image'],
             //'common.bisize.width'               => $config['common.bisize.width'],

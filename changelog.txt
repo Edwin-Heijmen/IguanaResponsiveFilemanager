@@ -485,10 +485,10 @@ NOTE: Changed upload button's icon!
 	- Added bunch of comments and change a lot of codes.
 
 	- Changed all $_SESSION vars to be in a separet array 
-	eg.:$_SESSION["verify"] -> $_SESSION['RF']["verify"]
+	eg.:$_SESSION["verify"] -> $_SESSION['IRF']["verify"]
 	So now there won't be any problem with big projecfts integrating RF
 
-	- Added the lang file url to $_SESSION['RF']['language_file']
+	- Added the lang file url to $_SESSION['IRF']['language_file']
 	Now it can be included easily
 
 	- Added a lot of new lang. lines and feedback info

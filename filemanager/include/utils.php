@@ -1,6 +1,6 @@
 <?php
 
-if (!isset($_SESSION['RF']) || $_SESSION['RF']["verify"] != "RESPONSIVEfilemanager") {
+if (!isset($_SESSION['IRF']) || $_SESSION['IRF']["verify"] != "RESPONSIVEfilemanager") {
     die('forbidden');
 }
 
@@ -40,9 +40,9 @@ if (!function_exists('trans')) {
     }
 
     // language
-    if (!isset($_SESSION['RF']['language'])
-        || file_exists('lang/' . basename($_SESSION['RF']['language']) . '.php') === false
-        || !is_readable('lang/' . basename($_SESSION['RF']['language']) . '.php')
+    if (!isset($_SESSION['IRF']['language'])
+        || file_exists('lang/' . basename($_SESSION['IRF']['language']) . '.php') === false
+        || !is_readable('lang/' . basename($_SESSION['IRF']['language']) . '.php')
     ) {
         $lang = $config['default_language'];
 
@@ -58,7 +58,7 @@ if (!function_exists('trans')) {
         }
 
         // add lang file to session for easy include
-        $_SESSION['RF']['language'] = $lang;
+        $_SESSION['IRF']['language'] = $lang;
     } else {
         if (file_exists('lang/languages.php')) {
             $languages = include 'lang/languages.php';
@@ -66,8 +66,8 @@ if (!function_exists('trans')) {
             $languages = include '../lang/languages.php';
         }
 
-        if (array_key_exists($_SESSION['RF']['language'], $languages)) {
-            $lang = $_SESSION['RF']['language'];
+        if (array_key_exists($_SESSION['IRF']['language'], $languages)) {
+            $lang = $_SESSION['IRF']['language'];
         } else {
             response('Lang_Not_Found' . AddErrorLocation())->send();
             exit;

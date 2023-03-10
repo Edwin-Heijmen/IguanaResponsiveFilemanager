@@ -7,7 +7,7 @@ try {
 
     include 'include/utils.php';
 
-    if ($_SESSION['RF']["verify"] != "RESPONSIVEfilemanager") {
+    if ($_SESSION['IRF']["verify"] != "RESPONSIVEfilemanager") {
         response(trans('forbidden') . AddErrorLocation(), 403)->send();
         exit;
     }
@@ -59,7 +59,9 @@ try {
                     $config['ext_file'],
                     $config['ext_misc'],
                     $config['ext_video'],
-                    $config['ext_music']
+                    $config['ext_music'],
+                    $config['ext_css'],
+                    $config['ext_font']
                 );
             }
             else{
@@ -83,6 +85,9 @@ try {
             $urlPattern = '/^(https?:\/\/)?([\da-z\.-]+\.[a-z\.]{2,6}|[\d\.]+)([\/?=&#]{1}[\da-z\.-]+)*[\/\?]?$/i';
 
             if (preg_match($urlPattern, $url)) {
+                /**
+                 * TODO: Make /tmp configurable !!!
+                 */
                 $temp = tempnam('/tmp', 'RF');
 
                 $ch = curl_init($url);

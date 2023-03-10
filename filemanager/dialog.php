@@ -1,4 +1,9 @@
 <?php
+/**
+ * 20230310.eh Plenty of changes to make it usable within Iguana / Iguana CMS
+ */
+
+include '../../php/iguana.generic.php';
 
 $time = time();
 
@@ -16,27 +21,37 @@ if (USE_ACCESS_KEYS == true) {
     }
 }
 
-$_SESSION['RF']["verify"] = "RESPONSIVEfilemanager";
+$_SESSION['IRF']["verify"] = "IguanaResponsiveFilemanager";
 
 if (isset($_POST['submit'])) {
     include 'upload.php';
 } else {
     $available_languages = include 'lang/languages.php';
 
+    // Only eng / dut / fre for now
+    $lang = !empty($_GET['lang']) ? strtolower($_GET['lang']) : null;
+    if ($lang=='fre') {
+        $lang = 'fr_FR';
+    } else if ($lang==='dut') {
+        $lang = 'nl';
+    } else {
+        $lang = 'en_EN';
+    }
+
     list($preferred_language) = array_values(
         array_filter(
             array(
-                isset($_GET['lang']) ? $_GET['lang'] : null,
-                isset($_SESSION['RF']['language']) ? $_SESSION['RF']['language'] : null,
+                $lang,
+                isset($_SESSION['IRF']['language']) ? $_SESSION['IRF']['language'] : null,
                 $config['default_language']
             )
         )
     );
 
     if (array_key_exists($preferred_language, $available_languages)) {
-        $_SESSION['RF']['language'] = $preferred_language;
+        $_SESSION['IRF']['language'] = $preferred_language;
     } else {
-        $_SESSION['RF']['language'] = $config['default_language'];
+        $_SESSION['IRF']['language'] = $config['default_language'];
     }
 }
 
@@ -46,14 +61,14 @@ $subdir_path = '';
 
 if (isset($_GET['fldr']) && !empty($_GET['fldr'])) {
     $subdir_path = rawurldecode(trim(strip_tags($_GET['fldr']), "/"));
-} elseif (isset($_SESSION['RF']['fldr']) && !empty($_SESSION['RF']['fldr'])) {
-    $subdir_path = rawurldecode(trim(strip_tags($_SESSION['RF']['fldr']), "/"));
+} elseif (isset($_SESSION['IRF']['fldr']) && !empty($_SESSION['IRF']['fldr'])) {
+    $subdir_path = rawurldecode(trim(strip_tags($_SESSION['IRF']['fldr']), "/"));
 }
 
 if (checkRelativePath($subdir_path)) {
     $subdir = strip_tags($subdir_path) . "/";
-    $_SESSION['RF']['fldr'] = $subdir_path;
-    $_SESSION['RF']["filter"] = '';
+    $_SESSION['IRF']['fldr'] = $subdir_path;
+    $_SESSION['IRF']["filter"] = '';
 } else {
     $subdir = '';
 }
@@ -90,16 +105,16 @@ if ($config['show_total_size']) {
 /***
  * SUB-DIR CODE
  ***/
-if (!isset($_SESSION['RF']["subfolder"])) {
-    $_SESSION['RF']["subfolder"] = '';
+if (!isset($_SESSION['IRF']["subfolder"])) {
+    $_SESSION['IRF']["subfolder"] = '';
 }
 $rfm_subfolder = '';
 
-if (!empty($_SESSION['RF']["subfolder"])
-    && strpos($_SESSION['RF']["subfolder"], "/") !== 0
-    && strpos($_SESSION['RF']["subfolder"], '.') === false
+if (!empty($_SESSION['IRF']["subfolder"])
+    && strpos($_SESSION['IRF']["subfolder"], "/") !== 0
+    && strpos($_SESSION['IRF']["subfolder"], '.') === false
 ) {
-    $rfm_subfolder = $_SESSION['RF']['subfolder'];
+    $rfm_subfolder = $_SESSION['IRF']['subfolder'];
 }
 
 if ($rfm_subfolder != "" && $rfm_subfolder[strlen($rfm_subfolder) - 1] != "/") {
@@ -116,7 +131,7 @@ if (($ftp && !$ftp->isDir(
 }
 
 
-$cur_dir = $config['upload_dir'] . $rfm_subfolder . $subdir;
+$cur_dir = $config['upload_url'] . $rfm_subfolder . $subdir;
 $cur_dir_thumb = $config['thumbs_upload_dir'] . $rfm_subfolder . $subdir;
 $thumbs_path = $config['thumbs_base_path'] . $rfm_subfolder . $subdir;
 $parent = $rfm_subfolder . $subdir;
@@ -185,12 +200,12 @@ if (isset($_GET['multiple'])) {
 
 if (isset($_GET['callback'])) {
     $callback = strip_tags($_GET['callback']);
-    $_SESSION['RF']["callback"] = $callback;
+    $_SESSION['IRF']["callback"] = $callback;
 } else {
     $callback = 0;
 
-    if (isset($_SESSION['RF']["callback"])) {
-        $callback = $_SESSION['RF']["callback"];
+    if (isset($_SESSION['IRF']["callback"])) {
+        $callback = $_SESSION['IRF']["callback"];
     }
 }
 
@@ -203,46 +218,46 @@ $crossdomain = isset($_GET['crossdomain']) ? strip_tags($_GET['crossdomain']) : 
 $crossdomain = !!$crossdomain;
 
 //view type
-if (!isset($_SESSION['RF']["view_type"])) {
+if (!isset($_SESSION['IRF']["view_type"])) {
     $view = $config['default_view'];
-    $_SESSION['RF']["view_type"] = $view;
+    $_SESSION['IRF']["view_type"] = $view;
 }
 
 if (isset($_GET['view'])) {
     $view = fix_get_params($_GET['view']);
-    $_SESSION['RF']["view_type"] = $view;
+    $_SESSION['IRF']["view_type"] = $view;
 }
 
-$view = $_SESSION['RF']["view_type"];
+$view = $_SESSION['IRF']["view_type"];
 
 //filter
 $filter = "";
-if (isset($_SESSION['RF']["filter"])) {
-    $filter = $_SESSION['RF']["filter"];
+if (isset($_SESSION['IRF']["filter"])) {
+    $filter = $_SESSION['IRF']["filter"];
 }
 
 if (isset($_GET["filter"])) {
     $filter = fix_get_params($_GET["filter"]);
 }
 
-if (!isset($_SESSION['RF']['sort_by'])) {
-    $_SESSION['RF']['sort_by'] = 'name';
+if (!isset($_SESSION['IRF']['sort_by'])) {
+    $_SESSION['IRF']['sort_by'] = 'name';
 }
 
 if (isset($_GET["sort_by"])) {
-    $sort_by = $_SESSION['RF']['sort_by'] = fix_get_params($_GET["sort_by"]);
+    $sort_by = $_SESSION['IRF']['sort_by'] = fix_get_params($_GET["sort_by"]);
 } else {
-    $sort_by = $_SESSION['RF']['sort_by'];
+    $sort_by = $_SESSION['IRF']['sort_by'];
 }
 
-if (!isset($_SESSION['RF']['descending'])) {
-    $_SESSION['RF']['descending'] = true;
+if (!isset($_SESSION['IRF']['descending'])) {
+    $_SESSION['IRF']['descending'] = true;
 }
 
 if (isset($_GET["descending"])) {
-    $descending = $_SESSION['RF']['descending'] = fix_get_params($_GET["descending"]) == 1;
+    $descending = $_SESSION['IRF']['descending'] = fix_get_params($_GET["descending"]) == 1;
 } else {
-    $descending = $_SESSION['RF']['descending'];
+    $descending = $_SESSION['IRF']['descending'];
 }
 
 $boolarray = array(false => 'false', true => 'true');
@@ -343,14 +358,8 @@ $get_params = http_build_query($get_params);
           href="https://cdnjs.cloudflare.com/ajax/libs/jplayer/2.7.1/skin/blue.monday/jplayer.blue.monday.min.css"/>
     <link href="css/style.css?v=<?php
     echo $version; ?>" rel="stylesheet" type="text/css"/>
-    <!--[if lt IE 8]>
-    <style>
-        .img-container span, .img-container-mini span {
-            display: inline-block;
-            height: 100%;
-        }
-    </style>
-    <![endif]-->
+    
+    <script type="text/javascript" src="CMS.CKFinder.cls"></script>
 
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"
             integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
@@ -363,11 +372,6 @@ $get_params = http_build_query($get_params);
     <script type="text/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.3/FileSaver.min.js"></script>
     <script src="js/modernizr.custom.js"></script>
-
-    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.6.2/html5shiv.js"></script>
-    <![endif]-->
     <!-- Only load TUI Libraries if we need it -->
     <?php
     if ($config['tui_active'] === true) { ?>
@@ -517,7 +521,7 @@ echo trans('Folders'); ?>"/>
 <input type="hidden" id="lang_files_on_clipboard" value="<?php
 echo trans('Files_ON_Clipboard'); ?>"/>
 <input type="hidden" id="clipboard" value="<?php
-echo((isset($_SESSION['RF']['clipboard']['path']) && trim($_SESSION['RF']['clipboard']['path']) != null) ? 1 : 0); ?>"/>
+echo((isset($_SESSION['IRF']['clipboard']['path']) && trim($_SESSION['IRF']['clipboard']['path']) != null) ? 1 : 0); ?>"/>
 <input type="hidden" id="lang_clear_clipboard_confirm" value="<?php
 echo trans('Clear_Clipboard_Confirm'); ?>"/>
 <input type="hidden" id="lang_file_permission" value="<?php

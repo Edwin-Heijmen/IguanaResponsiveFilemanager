@@ -4,15 +4,15 @@ $config = include 'config/config.php';
 
 require_once 'include/utils.php';
 
-if ($_SESSION['RF']["verify"] != "RESPONSIVEfilemanager") {
+if ($_SESSION['IRF']["verify"] != "RESPONSIVEfilemanager") {
     response(trans('forbidden').AddErrorLocation())->send();
     exit;
 }
 $languages = include 'lang/languages.php';
 
-if (isset($_SESSION['RF']['language']) && file_exists('lang/' . basename($_SESSION['RF']['language']) . '.php')) {
-    if (array_key_exists($_SESSION['RF']['language'], $languages)) {
-        include 'lang/' . basename($_SESSION['RF']['language']) . '.php';
+if (isset($_SESSION['IRF']['language']) && file_exists('lang/' . basename($_SESSION['IRF']['language']) . '.php')) {
+    if (array_key_exists($_SESSION['IRF']['language'], $languages)) {
+        include 'lang/' . basename($_SESSION['IRF']['language']) . '.php';
     } else {
         response(trans('Lang_Not_Found').AddErrorLocation())->send();
         exit;
@@ -50,7 +50,7 @@ if (isset($_GET['action'])) {
 
         case 'view':
             if (isset($_GET['type'])) {
-                $_SESSION['RF']["view_type"] = $_GET['type'];
+                $_SESSION['IRF']["view_type"] = $_GET['type'];
             } else {
                 response(trans('view type number missing').AddErrorLocation())->send();
                 exit;
@@ -60,7 +60,7 @@ if (isset($_GET['action'])) {
         case 'filter':
             if (isset($_GET['type'])) {
                 if (isset($config['remember_text_filter']) && $config['remember_text_filter']) {
-                    $_SESSION['RF']["filter"] = $_GET['type'];
+                    $_SESSION['IRF']["filter"] = $_GET['type'];
                 }
             } else {
                 response(trans('view type number missing').AddErrorLocation())->send();
@@ -70,12 +70,12 @@ if (isset($_GET['action'])) {
 
         case 'sort':
             if (isset($_GET['sort_by'])) {
-                $_SESSION['RF']["sort_by"] = $_GET['sort_by'];
+                $_SESSION['IRF']["sort_by"] = $_GET['sort_by'];
             }
 
 			if (isset($_GET['descending']))
 			{
-				$_SESSION['RF']["descending"] = $_GET['descending'];
+				$_SESSION['IRF']["descending"] = $_GET['descending'];
 			}
 			break;
 		case 'save_img':
@@ -397,12 +397,12 @@ if (isset($_GET['action'])) {
                 }
             }
 
-            $_SESSION['RF']['clipboard']['path'] = $_POST['path'];
-            $_SESSION['RF']['clipboard_action'] = $_POST['sub_action'];
+            $_SESSION['IRF']['clipboard']['path'] = $_POST['path'];
+            $_SESSION['IRF']['clipboard_action'] = $_POST['sub_action'];
             break;
         case 'clear_clipboard':
-            $_SESSION['RF']['clipboard'] = null;
-            $_SESSION['RF']['clipboard_action'] = null;
+            $_SESSION['IRF']['clipboard'] = null;
+            $_SESSION['IRF']['clipboard_action'] = null;
             break;
         case 'chmod':
             if ($ftp) {
@@ -518,7 +518,7 @@ if (isset($_GET['action'])) {
                 exit;
             }
 
-            $curr = $_SESSION['RF']['language'];
+            $curr = $_SESSION['IRF']['language'];
 
             $ret = '<select id="new_lang_select">';
             foreach ($languages as $code => $name) {
@@ -538,7 +538,7 @@ if (isset($_GET['action'])) {
                     response(trans('Lang_Not_Found').AddErrorLocation())->send();
                     exit;
                 } else {
-                    $_SESSION['RF']['language'] = $choosen_lang;
+                    $_SESSION['IRF']['language'] = $choosen_lang;
                 }
             }
 
